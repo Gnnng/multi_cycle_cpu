@@ -1,0 +1,13 @@
+`define	AND	4'b0000
+`define	OR		4'b0001
+`define	ADD	4'b0010
+`define	SUB	4'b0011
+`define	SLT	4'b0100
+`define	XOR	4'b0101
+`define	SLL	4'b0110
+`define	SRL	4'b0111
+`define	SRA	4'b1000
+`define	NOR	4'b1001
+`define	ADDU	4'b1010
+`define	SUBU	4'b1011
+`define	SLTU	4'b1100

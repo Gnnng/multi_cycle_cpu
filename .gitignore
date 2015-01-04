@@ -1,7 +1,16 @@
 _xmsgs
 iseconfig
+xst
 
 *.html
 *.gise
 *.xise
+*.cmd_log
+*.lso
+*.prj
+*.syr
+*.xst
+*.xml
+*.ngr
+
 

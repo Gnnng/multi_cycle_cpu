@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "ALU_OPERATION_DEFINES.v"
+`include "../include/ALU_OPERATION_DEFINES.v"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 

@@ -29,7 +29,7 @@ reg		[31:0]	douta;
 reg		[31:0]	memory[0:4095];
 
 initial begin
-	$readmemb("./coe/test_ram_temp.ram", memory);
+	$readmemb("../src_mips/test_ram_temp.ram", memory);
 end
 
 always @(posedge clka) begin

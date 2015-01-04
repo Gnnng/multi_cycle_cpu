@@ -70,8 +70,8 @@ wire		[11:0]	rom_addr;
 wire		[31:0]	rom_data_in, rom_data_out;
 
 wire					vga_rdn;
-wire		[10:0]	vram_out, vram_data_in;
-wire		[12:0]	vram_addr, vga_addr;
+wire		[18:0]	vram_out, vram_data_in;
+wire		[10:0]	vram_addr, vga_addr;
 
 wire		[31:0]	key_d;
 wire		[7:0]		key, ps2_key;

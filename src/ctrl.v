@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 `include "../include/ALU_OPERATION_DEFINES.v"
+`include "../include/CONFIG_DEFINES.v"
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -19,22 +21,33 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module ctrl(clk, reset, inst, zero, overflow, mio_ready, state_out, cpu_mio, ctrl_signals, ALUop, Beq, Sign);
+module ctrl(clk, reset, inst, zero, overflow, mio_ready, state_out, 
+	ctrl_signals, ALUop, Beq, Sign, INTsignal, int_signals, INTcause);
 input					clk, reset, zero, overflow, mio_ready;
 input		[31:0]	inst;
+input					INTsignal;
+
 
 output	[4:0]		state_out;
-output				cpu_mio;	//not used
 output	[15:0]	ctrl_signals;
 output	[3:0]		ALUop;
 output				Beq;
 output				Sign;
+output	[`INT_SIGNALS_WIDTH - 1:0]		int_signals;
+output	[31:0]	INTcause;
 
 wire		[5:0]		op = inst[31:26];
 wire		[5:0]		func = inst[5:0];
 reg		[3:0]		ALUop;
 reg					Beq;
 reg					Sign;
+
+// int signals
+reg		[1:0]		PCint;
+reg					EPCWrite, INTenable, INTdisable, CP0RegWrite, RegWriteSource;
+reg		[31:0]	INTcause;
+
+assign int_signals = {PCint, EPCWrite, INTenable, INTdisable, CP0RegWrite, RegWriteSource};		
 /*
 	nencessary informatin. DO NOT DELETE.
 reg		[1:0]		ALUsrcB, PCsource, MemtoReg, RegDst;
@@ -46,13 +59,11 @@ wire	[13:0]	ctrl = {PCWriteCond, PCWrite, IorD,
 */
 reg		[4:0]		status;
 
-reg		[15:0]	ctrl;
+//reg		[15:0]	ctrl;
 reg		[15:0]	signal[0:31];
-reg					cpu_mio_arr[0:30];
 
 assign state_out = status;
 assign ctrl_signals = signal[status];
-//assign cpu_mio = signal[status];
 // r-type 	000000 add, sub, slt, and, or, xor, nor
 // beq		000100
 // lw			100011
@@ -87,8 +98,18 @@ assign ctrl_signals = signal[status];
 `define	LUI		5'D12
 `define	JAL		5'D13
 `define	ALUREGI	5'D14
+`define 	JALR		5'D15
+`define	SYSCALL	5'D16
+`define	EXCEPT	5'D17
+`define  ERET		5'D18
+`define	CP0_R		5'D19 	// mfc0 cp0 read
+`define	CPU_W		5'D20		// mfc0 cpu write
+`define	CPU_R		5'D21		// mtc0 cpu read
+`define	CP0_W		5'D22		// mtc0 cp0 write
+
 initial begin
 	status <= `START;
+	signal[31]  <= 16'b0;
 	signal[0] 	<= 16'b0101000100000001;
 	signal[1] 	<= 16'b0000000000000011;
 	signal[2] 	<= 16'b0000000000000110;
@@ -104,30 +125,17 @@ initial begin
 	signal[12]	<= 16'b0000010000100000;
 	signal[13]	<= 16'b0100011010110000;
 	signal[14]	<= 16'b0000000000100000;
-//	cpu_mio_arr[`IF]				<= 1'b1;			not correct
-//	cpu_mio_arr[`ID]				<= 1'b0;
-//	cpu_mio_arr[`ADDR]			<= 1'b0;
-//	cpu_mio_arr[`MEM_R]			<= 1'b1;
-//	cpu_mio_arr[`MEMREG]			<= 1'b0;
-//	cpu_mio_arr[`MEM_W]			<= 1'b1;
-//	cpu_mio_arr[`RTYPE]			<= 1'b0;
-//	cpu_mio_arr[`ALUREG]			<= 1'b0;
-//	cpu_mio_arr[`BEQ]				<= 1'b0;
-//	cpu_mio_arr[`J]				<= 1'b0;
-//	cpu_mio_arr[`BNE]				<= 1'b0;
-//	cpu_mio_arr[`JR]				<= 1'b0
-//	cpu_mio_arr[`LUI]				<= 1'b0;
-//	cpu_mio_arr[`JAR]				<= 1'b0;
-//	cpu_mio_arr[`ALUREGI]		<= 1'b0;
-//	cpu_mio_arr[`START]			<= 1'b0;
-//	cpu_mio_arr[`ERROR]			<= 1'b1;
+	signal[15]	<= 16'b0000011001100100;
+	signal[16]	<= 16'b0100000000000000; // syscall
+	signal[17]	<= 16'b0100000000000000; // external int
+	signal[18]	<= 16'b0100000000000000; // eret
+	signal[19]	<= 16'b0;
+	signal[20]	<= 16'b0000000001100000;
+	signal[21] 	<= 16'b0;
+	signal[22]	<= 16'b0000000000000000;
 end
 
-/*
-wire	[13:0]	ctrl = {PCWriteCond, PCWrite, IorD, 
-					MemRead, MemWrite, MemtoReg, IRWrite, 
-					RegDst, RegWrite, PCsource, ALUsrcA, ALUsrcB};
-*/
+//{PCWriteCond, PCWrite, IorD, MemRead, MemWrite, MemtoReg(2), IRWrite, RegDst(2), RegWrite, PCsource(2), ALUsrcA, ALUsrcB(2)};
 
 always @(posedge clk or posedge reset) begin
 	if (reset) begin
@@ -135,22 +143,46 @@ always @(posedge clk or posedge reset) begin
 	end 
 	else
 		case (status)
-		`ERROR: status <= `ERROR;
-		`START, `MEMREG, `ALUREG, `ALUREGI, 
-		`J, `BEQ, `BNE, `JR, `LUI, `JAL: begin
+		`ERROR: begin
+			status <= `ERROR;
+		end
+		
+		`CP0_W, `CPU_W, `SYSCALL, `EXCEPT, `ERET, // add for exception
+		`START, `MEMREG, `ALUREG, `ALUREGI,
+		`J, `BEQ, `BNE, `JR, `LUI, `JAL: 
+		begin
 			status <= `IF;
 			ALUop <= `ADD;
 			Sign <= 1'b1;
+			// TODO: initial int signals
+			PCint <= 2'b00;
+			EPCWrite <= 1'b0;
+			INTenable <= 1'b0;
+			INTdisable <= 1'b0;
+			CP0RegWrite <= 1'b0;
+			RegWriteSource <= 1'b0;	
+			INTcause <= 32'b0;
 		end
 		
 		`IF: begin
 			if (mio_ready) begin
-				status <= `ID;
-				ALUop <= `ADD;
-			end else
+				if (INTsignal) begin
+					status <= `EXCEPT;
+					INTdisable <= 1'b1;
+					PCint <= 2'b01;
+//					PCWrite <= 1'b1;
+					EPCWrite <= 1'b1;
+					INTcause <= 32'd1;
+					// TODO: more int signals
+				end else begin
+					status <= `ID;
+					ALUop <= `ADD;
+				end
+			end else begin
 				status <= `IF;
 				ALUop <= `ADD;
 				Sign <= 1'b1;
+			end
 		end
 		
 		`ID:
@@ -168,6 +200,8 @@ always @(posedge clk or posedge reset) begin
 					6'b000011: ALUop <= `SRA;
 					6'b100111: ALUop <= `NOR;
 					6'b001000: ALUop <= `ADD;			// jr
+					6'b001001: ALUop <= `ADD;			// jalr
+					6'b001100: ALUop <= `ADD; 			// syscall, ALUop can be any value
 				endcase
 				case(func[5:0])
 					6'b100000,
@@ -182,6 +216,16 @@ always @(posedge clk or posedge reset) begin
 					6'b100111,
 					6'b001000:
 						status <= `RTYPE;
+					6'b001001:
+						status <= `JALR;
+					6'b001100: begin
+						status <= `SYSCALL;
+						INTdisable <= 1'b1;
+						PCint <= 2'b01;
+						EPCWrite <= 1'b1;
+						INTcause <= 32'd8;
+						// TODO:syscall not perfect
+					end
 					default:
 						status <= `ERROR;
 				endcase
@@ -226,29 +270,32 @@ always @(posedge clk or posedge reset) begin
 				status <= `ADDR;
 				ALUop <= `ADD;
 			end
-//			6'b100011, 										// lw
-//			6'b101011, 										// sw
-//			6'b001000, 										// addi
-//			6'b001100, 										// andi
-//			6'b001101, 										// ori
-//			6'b001110, 										// xori
-//			6'b001010: begin								// slti
-//				status <= `ADDR;
-//				case(op[5:0])
-//					6'b100011, 
-//					6'b101011, 
-//					6'b001000: ALUop <= `ADD;
-//					6'b001100: ALUop <= `AND;
-//					6'b001101: ALUop <= `OR;
-//					6'b001110: ALUop <= `XOR;
-//					6'b001010: ALUop <= `SLT;
-//				endcase
-//			end
 			6'b000011: begin
 				status <= `JAL;							// jal
 			end
 			6'b001111: begin
 				status <= `LUI;							// lui
+			end
+			6'b010000: begin								// eret, mfc0, mtc0 entry
+				case(inst[25:21])
+					5'b00000: begin						// mfc0
+						CP0RegWrite <= 0;
+//						RegWrite <= 0;
+						status <= `CP0_R;
+					end
+					
+					5'b00100: begin 						// mtc0
+//						RegWrite <= 0;
+						status <= `CPU_R;
+					end
+					
+					5'b10000: begin						// eret
+						status <= `ERET;
+						PCint <= 2'b10;
+						INTdisable <= 1'b0;
+						INTenable <= 1'b1;
+					end
+				endcase
 			end
 			default: begin
 				ALUop <= `ADD;
@@ -312,6 +359,22 @@ always @(posedge clk or posedge reset) begin
 					Beq <= 0;
 				end
 			endcase
+		end
+		
+		`JALR: begin
+			status <= `JR;
+		end
+		
+		`CP0_R: begin
+			status <= `CPU_W;
+//			RegWrite <= 1'b1;
+// 		RegDst <= 2'b01;
+			RegWriteSource <= 1'b1;
+		end
+		
+		`CPU_R: begin
+			status <= `CP0_W;
+			CP0RegWrite <= 1;
 		end
 	endcase
 end

@@ -28,18 +28,19 @@ module multi_cycle_cpu(
 	addr_out,
 	data_out,
 	data_in,
-	cpu_mio,
-	state
+	state,
+	INTsignal
 );
 
 input					clk;
 input					reset;
 input					mio_ready;
 input		[31:0]	data_in;
+input 				INTsignal;
 
 output	[31:0]	pc_out;
 output	[31:0]	inst;
-output				mem_w, cpu_mio;
+output				mem_w;
 output	[31:0]	addr_out, data_out;
 output	[4:0]		state;
 
@@ -47,29 +48,26 @@ wire		[31:0]	PC;
 wire		[4:0]		state;
 
 wire					zero, overflow;
-wire					cpu_mio;
 
+// int_ctrl_signals
+wire		[1:0]		PCint;
+wire					EPCWrite, INTenable, INTdisable, CP0RegWrite, RegWriteSource;
+wire		[31:0]	INTcause;
+wire 					_INTsignal;
+
+assign _INTsignal = INTsignal & INTable;
+
+//assign int_signals = {PCint, EPCWrite, INTenable, INTWrite, INTsyscall, CP0RegWrite, RegWriteSource};		
+
+`define int_ctrl_signals {PCint, EPCWrite, INTenable, INTdisable, CP0RegWrite, RegWriteSource}
+								
 // control signals
 wire		[3:0]		ALU_operation;
 wire		[1:0]		ALUsrcB, PCsource, RegDst, MemtoReg;
 wire					MemRead, MemWrite, IorD, IRWrite, RegWrite, ALUsrcA, PCWrite, PCWriteCond, Beq, Sign;
 
 `define cpu_ctrl_signals {PCWriteCond, PCWrite, IorD, MemRead, MemWrite, MemtoReg, IRWrite, RegDst, RegWrite, PCsource, ALUsrcA, ALUsrcB}
-
-ctrl U1(
-	.clk(clk),
-	.reset(reset),
-	.inst(inst),
-	.zero(zero),
-	.overflow(overflow),
-	.mio_ready(mio_ready),
-	.state_out(state),
-	.cpu_mio(cpu_mio),
-	.ctrl_signals(`cpu_ctrl_signals),
-	.ALUop(ALU_operation),
-	.Beq(Beq),
-	.Sign(Sign)
-);
+wire					INTable;
 
 datapath U2(
 	.clk(clk),
@@ -85,8 +83,30 @@ datapath U2(
 	.zero(zero),
 	.overflow(overflow),
 	.Beq(Beq),
-	.Sign(Sign)
+	.Sign(Sign),
+	.int_signals(`int_ctrl_signals),
+	.INTcause(INTcause),
+	.INTable(INTable)
 );
+
+ctrl U1(
+	.clk(clk),
+	.reset(reset),
+	.inst(inst),
+	.zero(zero),
+	.overflow(overflow),
+	.mio_ready(mio_ready),
+	.state_out(state),
+	.ctrl_signals(`cpu_ctrl_signals),
+	.ALUop(ALU_operation),
+	.Beq(Beq),
+	.Sign(Sign),
+	.INTsignal(_INTsignal), //TODO: not good design
+	.int_signals(`int_ctrl_signals),
+	.INTcause(INTcause)
+);
+
+
 
 assign mem_w = MemWrite && ~MemRead && ~clk;
 assign pc_out = PC;

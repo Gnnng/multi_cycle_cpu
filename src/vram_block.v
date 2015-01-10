@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:    20:31:54 08/21/2014 
+// Create Date:    22:01:20 01/06/2015 
 // Design Name: 
-// Module Name:    simple_cpu_more_int 
+// Module Name:    vram_block 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
@@ -18,11 +18,20 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module simple_cpu_more_int(clk, reset, pc_out, inst_in, mem_w, addr_out, cpudata_out, cpudata_in, INT);
-input					reset, INT, mem_w;
-input		[31:0]	inst_in, cpudata_in;
-output				pc_out;
-output	[31:0]	addr_out, cpudata_out;
+module vram_block(clka, wea, addra, dina, douta);
+input			clka, wea;
+input		[10:0]	addra;
+input		[18:0]	dina;
+output	[18:0]	douta;
 
+reg		[18:0]	douta;
+reg		[18:0]	memory;
+
+always @(posedge clka) begin
+	if (wea)
+		memory <= dina;
+	else
+		douta <= {3'b110, 16'h0061};
+end
 
 endmodule

@@ -27,16 +27,20 @@ output 	[31:0] 	douta;
 
 reg		[31:0]	douta;
 reg		[31:0]	memory[0:4095];
+//reg		[31:0]	memory[0:2047];
 
 initial begin
-	$readmemb("../src_mips/test_ram_temp.ram", memory);
+//	$readmemb("../src_mips/mfc0_mtc0.bin", memory);
+	$readmemb("src_mips/syscall_eret_test.bin", memory); // sim only
 end
 
 always @(posedge clka) begin
 	if (wea)
 		memory[addra[11:0]] <= dina;
+//		memory[addra[10:0]] <= dina;
 	else
 		douta <= memory[addra[11:0]];
+//		douta <= memory[addra[10:0]];
 end
 
 endmodule

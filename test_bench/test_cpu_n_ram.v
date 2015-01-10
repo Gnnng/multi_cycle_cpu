@@ -1,64 +1,75 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
-// 
-// Create Date:    14:12:51 08/25/2014 
-// Design Name: 
-// Module Name:    test_cpu_n_ram 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
+// Engineer:
+//
+// Create Date:   14:37:38 08/25/2014
+// Design Name:   test_cpu_n_ram
+// Module Name:   D:/GDL/SC/Lab/multi_cpu_converted/test_fixture_cpu_n_ram.v
+// Project Name:  multi_cpu_converted
+// Target Device:  
+// Tool versions:  
 // Description: 
 //
-// Dependencies: 
+// Verilog Test Fixture created by ISE for module: test_cpu_n_ram
 //
-// Revision: 
+// Dependencies:
+// 
+// Revision:
 // Revision 0.01 - File Created
-// Additional Comments: 
-//
-//////////////////////////////////////////////////////////////////////////////////
-module test_cpu_n_ram(clk, reset, pc, inst, state);
-input					clk;
-input					reset;
-output	[31:0]	pc;
-output	[31:0]	inst;
-output	[4:0]		state;
+// Additional Comments:
+// 
+////////////////////////////////////////////////////////////////////////////////
 
-wire					clkcpu, clk_mem, wea;
-wire		[12:0]	cpu_addr;
-wire		[31:0]	cpu_data2bus, cpu_data4bus;
+module test_cpu_n_ram;
 
-clk_div U8(
-.clk(clk), 
-.reset(reset), 
-.speed_select(0), 
-.clkcpu(clkcpu)
-);
+	// Inputs
+	reg clk;
+	reg reset;
+	reg INTsignal;
+	
+	// Outputs
+	wire [31:0] pc;
+	wire [31:0] inst;
+	wire [4:0] state;
 
-assign clk_mem = ~clk;
+	// Instantiate the Unit Under Test (UUT)
+	cpu_n_ram uut (
+		.clk(clk), 
+		.reset(reset), 
+		.pc(pc), 
+		.inst(inst), 
+		.state(state),
+		.INTsignal(INTsignal)
+	);
 
-multi_cycle_cpu U1(
-	.clk(clkcpu),
-	.reset(reset),
-	.mio_ready(1),
-	.pc_out(pc),		// test
-	.inst(inst),			// test
-	.mem_w(mem_w),
-	.addr_out(cpu_addr),
-	.data_out(cpu_data2bus),
-	.data_in(cpu_data4bus),
-	.state(state)
-);
+	integer i;
 
-ram_block_temp U2(
-	.clka(clk_mem),
-	.wea(mem_w),
-	.addra(cpu_addr[12:2]),
-	.dina(cpu_data2bus),
-	.douta(cpu_data4bus)
-);
+	initial begin
+		// Initialize Inputs
+		clk = 0;
+		reset = 0;
+		INTsignal = 0;
+		// Wait 100 ns for global reset to finish
+		#100;
+      fork
+			forever #10 clk = ~clk;
+			begin
+				#10
+				for(i = 0; i < 1000; i = i + 1) begin
+					#20;
+					case(i)
+						5: reset = 1;
+						10: reset = 0;
+						500: INTsignal = 1;
+					endcase
+				end
+			end
+		join
+		// Add stimulus here
 
-
-
+	end
+      
 endmodule
+

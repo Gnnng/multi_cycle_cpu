@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="X:/cpu/test_cpu_n_ram_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="test_cpu_n_ram" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="16" />
+   <wvobject fp_name="/test_cpu_n_ram/pc" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/inst" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/state" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">state[4:0]</obj_property>
+      <obj_property name="ObjectShortName">state[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/i" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U1/ctrl_signals" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ctrl_signals[15:0]</obj_property>
+      <obj_property name="ObjectShortName">ctrl_signals[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/cp0_enable" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cp0_enable[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cp0_enable[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/cp0_status" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cp0_status[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cp0_status[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/cp0_cause" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cp0_cause[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cp0_cause[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/cp0_epc" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cp0_epc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cp0_epc[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/cp0_base" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cp0_base[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cp0_base[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/regC" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">regC[31:0]</obj_property>
+      <obj_property name="ObjectShortName">regC[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/INTsignal" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">INTsignal</obj_property>
+      <obj_property name="ObjectShortName">INTsignal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U1/INTsignal" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">INTsignal</obj_property>
+      <obj_property name="ObjectShortName">INTsignal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu_n_ram/uut/U1/U2/INTable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">INTable</obj_property>
+      <obj_property name="ObjectShortName">INTable</obj_property>
+   </wvobject>
+</wave_config>

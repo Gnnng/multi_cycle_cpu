@@ -19,12 +19,12 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module seven_seg_dev_io(clk, reset, GPIOfffffe00_we, test_select, cpu_data,
-	test_data0, test_data1, test_data2, test_data3, test_data4,
+	test_data7, test_data1, test_data2, test_data3, test_data4,
 	test_data5, test_data6, disp_num
     );
 input					clk, reset, GPIOfffffe00_we;
 input		[2:0]		test_select;
-input		[31:0]	cpu_data, test_data0, test_data1, test_data2, test_data3, 
+input		[31:0]	cpu_data, test_data7, test_data1, test_data2, test_data3, 
 						test_data4, test_data5, test_data6;
 output	[31:0]	disp_num;
 reg		[31:0]	disp_num;
@@ -40,13 +40,13 @@ always @(negedge clk or posedge reset) begin
 				else
 					disp_num <= disp_num;
 				end
-			1: disp_num <= {2'b00, test_data0[31:2]};				//PC
-			2: disp_num <= test_data1;									//counter
-			3: disp_num <= test_data2;									//inst
-			4: disp_num <= test_data3;									//cpu_addr
-			5: disp_num <= test_data4;									//cpu_data2bus
-			6: disp_num <= test_data5;									//state
-			7: disp_num <= test_data6;									//ps2
+			1: disp_num <= {2'b00, test_data1[31:2]};				//PC
+			2: disp_num <= test_data2;									//counter
+			3: disp_num <= test_data3;									//inst
+			4: disp_num <= test_data4;									//cpu_addr
+			5: disp_num <= test_data5;									//cpu_data2bus
+			6: disp_num <= test_data6;									//state
+			7: disp_num <= test_data7;									//ps2
 		endcase
 	end
 end

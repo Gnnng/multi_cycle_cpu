@@ -1,6 +1,8 @@
 _xmsgs
 iseconfig
 xst
+_ngo
+xlnx_auto_0_xdb
 
 *.html
 *.gise
@@ -12,5 +14,8 @@ xst
 *.xst
 *.xml
 *.ngr
+*.log
 
+top*
 
+disasm.txt
